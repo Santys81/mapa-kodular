@@ -1,77 +1,138 @@
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html>
 <head>
-    <title>Mapa con Brújula</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background: black;
-        }
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-        .compass-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            z-index: 1000;
-            padding: 10px;
-            text-align: center;
-            color: white;
-            font-family: Arial;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-        }
-        .compass-arrow {
-            width: 60%;
-            height: 60%;
-            margin: 10% auto;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF0000"><path d="M12 2L4 22L12 17L20 22Z"/></svg>') no-repeat;
-            background-size: contain;
-            transition: transform 0.3s;
-        }
-        .compass-degrees {
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-        }
-    </style>
+<title>Map with Compass and Custom Buttons</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+/* Black page background */
+body, html {
+margin: 0;
+padding: 0;
+height: 100%;
+background: black;
+}
+#map {
+height: 100vh;
+width: 100%;
+}
+
+/* Button style (view change and zoom) */
+.leaflet-control-layers, .leaflet-control-zoom {
+background: rgba(0, 0, 0, 0.8) !important; /* Black background */
+border-radius: 5px !important;
+border: none !important;
+ box-shadow: none !important;
+ }
+ .leaflet-control-layers-toggle, .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+ background-color: transparent !important;
+ border: none !important;
+ color: white !important; /* White symbol */
+ font-size: 18px !important;
+ line-height: 26px !important;
+ }
+ .leaflet-control-layers-toggle {
+ width: 30px !important;
+ height: 30px !important;
+ background-image: none !important;
+ text-align: center !important;
+ }
+ .leaflet-control-layers {
+ position: absolute;
+ top: 10px; /* View switch button position */
+left: 10px;
+z-index: 1000;
+}
+.leaflet-control-zoom {
+position: absolute;
+top: 80px; /* Zoom buttons down further */
+left: 10px;
+z-index: 1000;
+}
+
+/* Compass style */
+.compass-container {
+position: absolute;
+top: 10px; /* Move compass up to the view switch button line */
+right: 10px;
+background: rgba(0, 0, 0, 0.8);
+border-radius: 50%;
+width: 80px;
+height: 80px;
+z-index: 1000;
+padding: 10px;
+text-align: center;
+color: white;
+font-family: Arial;
+font-weight: bold;
+ text-shadow: 1px 1px 2px black;
+ }
+ .compass-arrow {
+ width: 60%;
+ height: 60%;
+ margin: 10% auto;
+ background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF0000"><path d="M12 2L4 22L12 17L20 22Z"/></svg>') no-repeat;
+ background-size: contain;
+ transition: transform 0.3s;
+ }
+ .compass-directions {
+ position: absolute;
+ width: 100%;
+ height: 100%;
+ top: 0;
+ left: 0;
+ }
+ .direction-n { position: absolute; top: 5px; left: 35%; }
+ .direction-e { position: absolute; top: 40%; right: 5px; }
+ .direction-s { position: absolute; bottom: 5px; left: 35%; }
+ .direction-w { position: absolute; top: 40%; left: 5px; }
+ .compass-degrees {
+ position: absolute;
+ bottom: -20px;
+ left: 50%;
+ transform: translateX(-50%);
+ font-size: 12px;
+ }
+
+ /* Custom icon for the view switch button */
+ .leaflet-control-layers-toggle::before {
+ content: '🛠️'; /* Tool icon (you can change it) */
+font-size: 18px;
+}
+ </style>
 </head>
 <body>
-    <div id="map"></div>
-    <div class="compass-container">
-        <div class="compass-arrow" id="compassArrow"></div>
-        <div class="compass-degrees" id="compassDegrees">0°</div>
-    </div>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script>
-        var map;
-        var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+ <div id="map"></div>
+ <div class="compass-container">
+ <div class="compass-directions">
+ <div class="direction-n">N</div>
+ <div class="direction-e">E</div>
+ <div class="direction-s">S</div>
+ <div class="direction-w">W</div>
+ </div>
+ <div class="compass-arrow" id="compassArrow"></div>
+ <div class="compass-degrees" id="compassDegrees">0°</div>
+ </div>
+ <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+ <script>
+ // Map and layers
+ var map = L.map('map').setView([41.441, -1.2419], 13);
+ var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+streetLayer.addTo(map);
 
-        function initializeMap(lat, lng) {
-            map = L.map('map').setView([lat, lng], 13);
-            streetLayer.addTo(map);
-        }
+// Layer control (view switch button)
+L.control.layers({ "Street": streetLayer, "Satellite": satelliteLayer }, null, {
+position: 'topleft' // Position of the view switch button
+}).addTo(map);
 
-        function updateHunter(lat, lng, heading) {
-            if (lat !== undefined && lng !== undefined) {
-                map.setView([lat, lng], 13);
-            }
-            if (heading !== undefined) {
-                document.getElementById('compassArrow').style.transform = `rotate(${heading}deg)`;
-                document.getElementById('compassDegrees').textContent = `${Math.round(heading)}°`;
-            }
-        }
-    </script>
-</body>
-</html>
+// Zoom control (zoom buttons)
+L.control.zoom({
+position: 'topleft' // Position of the zoom buttons
+}).addTo(map);
+
+// Variables for the compass
+var currentHeading = 0;
+
+// Function to update hunter and compass
+function updateHunter(lat, lng, heading) {
+// Update position (your current code)
