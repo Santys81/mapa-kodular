@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mapa con Recorrido</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 100vh; width: 100%; }
+        .leaflet-control-layers { margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Crear el mapa
+        var map = L.map('map').setView([19.4326, -99.1332], 13); // Coordenadas iniciales y zoom
+
+        // Capa de vista calle (OpenStreetMap)
+        var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        });
+
+        // Capa de vista satélite (usando OpenTopoMap)
+        var satelliteLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenTopoMap contributors'
+        });
+
+        // Añadir capas al mapa
+        streetLayer.addTo(map);
+
+        // Control de capas para cambiar entre vista calle y satélite
+        var baseLayers = {
+            "Calle": streetLayer,
+            "Satélite": satelliteLayer
+        };
+        L.control.layers(baseLayers).addTo(map);
+
+        // Variables para grabar el recorrido
+        var polyline;
+        var latlngs = [];
+
+        // Función para grabar el recorrido
+        function startRecording() {
+            latlngs = []; // Reiniciar el array de coordenadas
+            map.on('click', function(e) {
+                latlngs.push(e.latlng); // Añadir coordenadas al array
+                if (polyline) {
+                    map.removeLayer(polyline); // Eliminar la línea anterior
+                }
+                polyline = L.polyline(latlngs, {color: 'blue'}).addTo(map); // Dibujar la línea
+            });
+        }
+
+        // Función para resetear el recorrido
+        function resetRecording() {
+            if (polyline) {
+                map.removeLayer(polyline); // Eliminar la línea del mapa
+            }
+            latlngs = []; // Reiniciar el array de coordenadas
+        }
+
+        // Exponer funciones al ámbito global para que Kodular las llame
+        window.startRecording = startRecording;
+        window.resetRecording = resetRecording;
+    </script>
+</body>
+</html>
