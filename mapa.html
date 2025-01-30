@@ -1,58 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mapa con Brújula y Botones Personalizados</title>
+    <title>Mapa con Brújula</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-        /* Fondo de la página negro */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             background: black;
         }
-        #map { 
-            height: 100vh; 
-            width: 100%; 
+        #map {
+            height: 100vh;
+            width: 100%;
         }
-
-        /* Estilo de los botones (cambio de vista y zoom) */
-        .leaflet-control-layers, .leaflet-control-zoom {
-            background: rgba(0, 0, 0, 0.8) !important; /* Fondo negro */
-            border-radius: 5px !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        .leaflet-control-layers-toggle, .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-            background-color: transparent !important;
-            border: none !important;
-            color: white !important; /* Símbolo blanco */
-            font-size: 18px !important;
-            line-height: 26px !important;
-        }
-        .leaflet-control-layers-toggle {
-            width: 30px !important;
-            height: 30px !important;
-            background-image: none !important;
-            text-align: center !important;
-        }
-        .leaflet-control-layers {
-            position: absolute;
-            top: 10px; /* Posición del botón de cambio de vista */
-            left: 10px;
-            z-index: 1000;
-        }
-        .leaflet-control-zoom {
-            position: absolute;
-            top: 80px; /* Bajar más los botones de zoom */
-            left: 10px;
-            z-index: 1000;
-        }
-
-        /* Estilo de la brújula */
         .compass-container {
             position: absolute;
-            top: 10px; /* Subir la brújula a la línea del botón de cambio de vista */
+            top: 10px;
             right: 10px;
             background: rgba(0, 0, 0, 0.8);
             border-radius: 50%;
@@ -74,17 +38,6 @@
             background-size: contain;
             transition: transform 0.3s;
         }
-        .compass-directions {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }
-        .direction-n { position: absolute; top: 5px; left: 35%; }
-        .direction-e { position: absolute; top: 40%; right: 5px; }
-        .direction-s { position: absolute; bottom: 5px; left: 35%; }
-        .direction-w { position: absolute; top: 40%; left: 5px; }
         .compass-degrees {
             position: absolute;
             bottom: -20px;
@@ -92,65 +45,33 @@
             transform: translateX(-50%);
             font-size: 12px;
         }
-
-        /* Ícono personalizado para el botón de cambio de vista */
-        .leaflet-control-layers-toggle::before {
-            content: '🛠️'; /* Ícono de herramienta (puedes cambiarlo) */
-            font-size: 18px;
-        }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <div class="compass-container">
-        <div class="compass-directions">
-            <div class="direction-n">N</div>
-            <div class="direction-e">E</div>
-            <div class="direction-s">S</div>
-            <div class="direction-w">W</div>
-        </div>
         <div class="compass-arrow" id="compassArrow"></div>
         <div class="compass-degrees" id="compassDegrees">0°</div>
     </div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // Mapa y capas
-        var map = L.map('map').setView([41.441, -1.2419], 13);
+        var map;
         var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-        var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
-        streetLayer.addTo(map);
 
-        // Control de capas (botón de cambio de vista)
-        L.control.layers({ "Calle": streetLayer, "Satélite": satelliteLayer }, null, {
-            position: 'topleft' // Posición del botón de cambio de vista
-        }).addTo(map);
+        function initializeMap(lat, lng) {
+            map = L.map('map').setView([lat, lng], 13);
+            streetLayer.addTo(map);
+        }
 
-        // Control de zoom (botones de zoom)
-        L.control.zoom({
-            position: 'topleft' // Posición de los botones de zoom
-        }).addTo(map);
-
-        // Variables para la brújula
-        var currentHeading = 0;
-
-        // Función para actualizar cazador y brújula
         function updateHunter(lat, lng, heading) {
-            // Actualizar posición (tu código actual)
-            // ...
-
-            // Actualizar brújula
+            if (lat !== undefined && lng !== undefined) {
+                map.setView([lat, lng], 13);
+            }
             if (heading !== undefined) {
                 document.getElementById('compassArrow').style.transform = `rotate(${heading}deg)`;
                 document.getElementById('compassDegrees').textContent = `${Math.round(heading)}°`;
-                currentHeading = heading;
             }
         }
-
-        // Ejemplo de uso (simulación de datos)
-        setInterval(() => {
-            const heading = Math.random() * 360; // Simula un valor de heading
-            updateHunter(19.4326, -99.1332, heading);
-        }, 1000);
     </script>
 </body>
 </html>
