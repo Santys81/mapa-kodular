@@ -156,7 +156,7 @@
         // Ícono personalizado para el cazador (azul)
         var hunterIcon = L.divIcon({
             className: 'leaflet-div-icon',
-            html: '<i class="fas fa-person-hiking" style="color: b6df3a ;"></i>',
+            html: '<i class="fas fa-person-hiking" style="color: blue;"></i>',
             iconSize: [25, 41], // Tamaño del ícono
             iconAnchor: [12, 41], // Punto de anclaje del ícono
             popupAnchor: [1, -34] // Punto de anclaje del popup
@@ -277,6 +277,36 @@
             }
         }
 
+        // Función para guardar el recorrido del cazador
+        function saveHunterPath() {
+            // Guardar el recorrido del cazador en una variable global
+            window.hunterPath = hunterLatLngs;
+        }
+
+        // Función para guardar el recorrido de una mascota
+        function savePetPath(index) {
+            var pet = petMarkers[index];
+            if (pet) {
+                // Guardar el recorrido de la mascota en una variable global
+                window[`petPath${index}`] = pet.latLngs;
+            }
+        }
+
+        // Función para mostrar el recorrido del cazador en el mapa
+        function showHunterPath() {
+            if (window.hunterPath) {
+                hunterPolyline.setLatLngs(window.hunterPath);
+            }
+        }
+
+        // Función para mostrar el recorrido de una mascota en el mapa
+        function showPetPath(index) {
+            var pet = petMarkers[index];
+            if (pet && window[`petPath${index}`]) {
+                pet.polyline.setLatLngs(window[`petPath${index}`]);
+            }
+        }
+
         // Función para resetear el recorrido
         function resetPaths() {
             // Resetear el recorrido del cazador
@@ -290,7 +320,11 @@
             });
         }
 
-        // Exponer la función resetPaths para que pueda ser llamada desde Kodular
+        // Exponer las funciones para que puedan ser llamadas desde Kodular
+        window.saveHunterPath = saveHunterPath;
+        window.savePetPath = savePetPath;
+        window.showHunterPath = showHunterPath;
+        window.showPetPath = showPetPath;
         window.resetPaths = resetPaths;
 
         // Ejemplo de uso (simulación de datos)
